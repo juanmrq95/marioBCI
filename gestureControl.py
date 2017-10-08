@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+from pykeyboard import PyKeyboard
+from pymouse import PyMouse
+from time import sleep
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter, lfilter_zi
@@ -54,6 +57,9 @@ class LSLViewer():
         self.dejitter = dejitter
         self.inlet = StreamInlet(stream, max_chunklen=buf)
         self.filt = True
+        self.k = PyKeyboard()
+        self.m = PyMouse()
+        self.xdim, self.ydim = self.m.screen_size()
 
         info = self.inlet.info()
         description = info.desc()
@@ -94,6 +100,7 @@ class LSLViewer():
         ticks = np.arange(0, -self.n_chan, -1)
 
         axes.set_xlabel('Time (s)')
+        axes.set_ylabel('Average Voltage (uV)')
         axes.xaxis.grid(False)
         axes.set_yticks(ticks)
 
@@ -103,8 +110,7 @@ class LSLViewer():
 
         self.display_every = int(0.2 / (12/self.sfreq))
 
-        self.bf, self.af = butter(4, np.array([1, 40])/(self.sfreq/2.),
-                                  'bandpass')
+        self.bf, self.af = butter(4, np.array([1, 40])/(self.sfreq/2.),'bandpass')
         zi = lfilter_zi(self.bf, self.af)
         self.filt_state = np.tile(zi, (self.n_chan, 1)).transpose()
         self.data_f = np.zeros((self.n_samples, self.n_chan))
@@ -138,21 +144,42 @@ class LSLViewer():
                         plot_data = self.data_f
                     elif not self.filt:
                         plot_data = self.data - self.data.mean(axis=0)
-                    #                    RC,LC,EY,WR    
-                    t_values = np.array([50,50,30,100])
+                    #                    LC,RC,EY,WR
+                    t_values = np.array([90,90,70,100])
 
                     print("Data\n")
                     last_100ms = np.absolute(plot_data[980:,:])
-                    print(last_100ms)
-                    print("Average\n")
-                    print(np.mean(last_100ms, axis = 0))
-                    print("Max\n")
-                    print(np.max(last_100ms, axis = 0))
-                    print("Count\n")
+                    # print(last_100ms)
+                    # print("Average\n")
+                    # print(np.mean(last_100ms, axis = 0))
+                    # print("Max\n")
+                    # print(np.max(last_100ms, axis = 0))
+                    # print("Count\n")
                     print("L, R, E, W")
-                    print(np.sum(last_100ms > t_values, axis = 0))
+                    # print(np.sum(last_100ms > t_values, axis = 0))
                     print("\n")
-                    cmdArr = np.sum(last_100ms > t_values, axis = 0) > 8
+                    cmdArr = np.sum(last_100ms > t_values, axis = 0) > [14,14,8,10]
+                    print(cmdArr)
+                    print("\n")
+
+                    self.k.release_key('c')
+                    self.k.release_key('v')xcx
+                    self.k.release_key('z')
+                    self.k.release_key('x')
+                    ##Keyboard Input
+                    if cmdArr[0]: ##Mario Left
+                        self.k.press_key('c')
+                    if cmdArr[1]: ##Mario Right
+                        self.k.press_key('v')
+                    if cmdArr[2]: ## Mario Jump
+                        self.k.press_key('z')
+                    if cmdArr[3]: ## Mario Special
+                        self.k.press_key('x')
+
+
+                    ####
+
+
 
                     for ii in range(self.n_chan):
                         self.lines[ii].set_xdata(self.times[::subsample] -

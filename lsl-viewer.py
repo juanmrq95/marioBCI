@@ -43,7 +43,6 @@ if len(streams) == 0:
 print("Start aquiring data")
 
 
-
 class LSLViewer():
 
     def __init__(self, stream, fig, axes,  window, scale, dejitter=True):
@@ -94,7 +93,6 @@ class LSLViewer():
         ticks = np.arange(0, -self.n_chan, -1)
 
         axes.set_xlabel('Time (s)')
-        axes.set_ylabel('Average Voltage (uV)')
         axes.xaxis.grid(False)
         axes.set_yticks(ticks)
 
@@ -104,7 +102,8 @@ class LSLViewer():
 
         self.display_every = int(0.2 / (12/self.sfreq))
 
-        self.bf, self.af = butter(4, np.array([1, 40])/(self.sfreq/2.),'bandpass')
+        self.bf, self.af = butter(4, np.array([1, 40])/(self.sfreq/2.),
+                                  'bandpass')
         zi = lfilter_zi(self.bf, self.af)
         self.filt_state = np.tile(zi, (self.n_chan, 1)).transpose()
         self.data_f = np.zeros((self.n_samples, self.n_chan))
@@ -131,31 +130,12 @@ class LSLViewer():
                 self.data_f = np.vstack([self.data_f, filt_samples])
                 self.data_f = self.data_f[-self.n_samples:]
                 k += 1
-
                 if k == self.display_every:
 
                     if self.filt:
                         plot_data = self.data_f
                     elif not self.filt:
                         plot_data = self.data - self.data.mean(axis=0)
-                    #                    RC,LC,EY,WR    
-                    t_values = np.array([50,50,30,100])
-
-                    print("Data\n")
-                    last_100ms = np.absolute(plot_data[980:,:])
-                    print(last_100ms)
-                    print("Average\n")
-                    print(np.mean(last_100ms, axis = 0))
-                    print("Max\n")
-                    print(np.max(last_100ms, axis = 0))
-                    print("Count\n")
-                    print("L, R, E, W")
-                    print(np.sum(last_100ms > t_values, axis = 0))
-                    print("\n")
-                    cmdArr = np.sum(last_100ms > t_values, axis = 0) > 8
-
-                    
-
                     for ii in range(self.n_chan):
                         self.lines[ii].set_xdata(self.times[::subsample] -
                                                  self.times[-1])
@@ -199,10 +179,8 @@ class LSLViewer():
         self.started = False
 
 
-##print(streams[0])
 fig, axes = plt.subplots(1, 1, figsize=figsize, sharex=True)
 lslv = LSLViewer(streams[0], fig, axes, window, scale)
-
 
 help_str = """
             toggle filter : d
@@ -212,7 +190,6 @@ help_str = """
             increase time scale : -
             decrease time scale : +
            """
-
 print(help_str)
 lslv.start()
 
