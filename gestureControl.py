@@ -145,7 +145,7 @@ class LSLViewer():
                     elif not self.filt:
                         plot_data = self.data - self.data.mean(axis=0)
                     #                    LC,RC,EY,WR
-                    t_values = np.array([90,90,70,100])
+                    t_values = np.array([75,75,75,1000])
 
                     print("Data\n")
                     last_100ms = np.absolute(plot_data[980:,:])
@@ -158,12 +158,12 @@ class LSLViewer():
                     print("L, R, E, W")
                     # print(np.sum(last_100ms > t_values, axis = 0))
                     print("\n")
-                    cmdArr = np.sum(last_100ms > t_values, axis = 0) > [14,14,8,10]
+                    cmdArr = np.sum(last_100ms > t_values, axis = 0) > [10,7,10,10]
                     print(cmdArr)
                     print("\n")
 
                     self.k.release_key('c')
-                    self.k.release_key('v')xcx
+                    self.k.release_key('v')
                     self.k.release_key('z')
                     self.k.release_key('x')
                     ##Keyboard Input
